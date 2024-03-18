@@ -7,6 +7,7 @@ import { ModelVendorLocalAI } from './localai/localai.vendor';
 import { ModelVendorMistral } from './mistral/mistral.vendor';
 import { ModelVendorOllama } from './ollama/ollama.vendor';
 import { ModelVendorOoobabooga } from './oobabooga/oobabooga.vendor';
+import { ModelVendorSCore } from './score/score.vendor';
 import { ModelVendorOpenAI } from './openai/openai.vendor';
 import { ModelVendorOpenRouter } from './openrouter/openrouter.vendor';
 import { ModelVendorPerplexity } from './perplexity/perplexity.vendor';
@@ -25,6 +26,7 @@ export type ModelVendorId =
   | 'mistral'
   | 'ollama'
   | 'oobabooga'
+  | 'score'
   | 'openai'
   | 'openrouter'
   | 'perplexity'
@@ -41,13 +43,14 @@ const MODEL_VENDOR_REGISTRY: Record<ModelVendorId, IModelVendor> = {
   mistral: ModelVendorMistral,
   ollama: ModelVendorOllama,
   oobabooga: ModelVendorOoobabooga,
+  score: ModelVendorSCore,
   openai: ModelVendorOpenAI,
   openrouter: ModelVendorOpenRouter,
   perplexity: ModelVendorPerplexity,
   togetherai: ModelVendorTogetherAI,
 } as Record<string, IModelVendor>;
 
-const MODEL_VENDOR_DEFAULT: ModelVendorId = 'openai';
+const MODEL_VENDOR_DEFAULT: ModelVendorId = 'score';
 
 
 export function findAllVendors(): IModelVendor[] {

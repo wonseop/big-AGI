@@ -104,6 +104,7 @@ export async function llmStreamingRelayHandler(req: NextRequest): Promise<Respon
       case 'localai':
       case 'mistral':
       case 'oobabooga':
+      case 'score':
       case 'openai':
       case 'openrouter':
       case 'perplexity':

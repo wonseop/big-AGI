@@ -11,12 +11,12 @@ import { Brand } from '~/common/app.config';
 import { fixupHost } from '~/common/util/urlUtils';
 
 import { OpenAIWire, WireOpenAICreateImageOutput, wireOpenAICreateImageOutputSchema, WireOpenAICreateImageRequest } from './openai.wiretypes';
-import { azureModelToModelDescription, groqModelToModelDescription, lmStudioModelToModelDescription, localAIModelToModelDescription, mistralModelsSort, mistralModelToModelDescription, oobaboogaModelToModelDescription, openAIModelToModelDescription, openRouterModelFamilySortFn, openRouterModelToModelDescription, perplexityAIModelDescriptions, perplexityAIModelSort, togetherAIModelsToModelDescriptions } from './models.data';
+import { azureModelToModelDescription, groqModelToModelDescription, lmStudioModelToModelDescription, localAIModelToModelDescription, mistralModelsSort, mistralModelToModelDescription, oobaboogaModelToModelDescription, scoreModelToModelDescription, openAIModelToModelDescription, openRouterModelFamilySortFn, openRouterModelToModelDescription, perplexityAIModelDescriptions, perplexityAIModelSort, togetherAIModelsToModelDescriptions } from './models.data';
 import { llmsChatGenerateWithFunctionsOutputSchema, llmsListModelsOutputSchema, ModelDescriptionSchema } from '../llm.server.types';
 import { wilreLocalAIModelsApplyOutputSchema, wireLocalAIModelsAvailableOutputSchema, wireLocalAIModelsListOutputSchema } from './localai.wiretypes';
 
 const openAIDialects = z.enum([
-  'azure', 'groq', 'lmstudio', 'localai', 'mistral', 'oobabooga', 'openai', 'openrouter', 'perplexity', 'togetherai',
+  'azure', 'groq', 'lmstudio', 'localai', 'mistral', 'oobabooga', 'score', 'openai', 'openrouter', 'perplexity', 'togetherai',
 ]);
 
 export const openAIAccessSchema = z.object({
@@ -185,6 +185,13 @@ export const llmOpenAIRouter = createTRPCRouter({
         case 'oobabooga':
           models = openAIModels
             .map(model => oobaboogaModelToModelDescription(model.id, model.created))
+            .filter(model => !model.hidden);
+          break;
+
+        // [SCore]: remove virtual models, hidden by default
+        case 'score':
+          models = openAIModels
+            .map(model => scoreModelToModelDescription(model.id, model.created))
             .filter(model => !model.hidden);
           break;
 
@@ -413,6 +420,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
 
     case 'lmstudio':
     case 'oobabooga':
+    case 'score':
     case 'openai':
       const oaiKey = access.oaiKey || env.OPENAI_API_KEY || '';
       const oaiOrg = access.oaiOrg || env.OPENAI_API_ORG_ID || '';

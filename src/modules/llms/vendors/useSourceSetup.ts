@@ -24,6 +24,16 @@ export function useSourceSetup<TSourceSetup, TAccess, TLLMOptions>(sourceId: DMo
     const sourceLLMs = source ? state.llms.filter(llm => llm._source === source) : [];
     const access = vendor.getTransportAccess(source?.setup);
 
+    console.log({
+      hasNoBackendCap,
+      source,
+      partialSetup: source?.setup ?? null, // NOTE: do not use - prefer ACCESS; only used in 1 edge case now
+      access,
+      sourceHasLLMs: !!sourceLLMs.length,
+      sourceSetupValid,
+      updateSourceSetup: state.updateSourceSetup,
+    });
+
     return {
       hasNoBackendCap,
       source,

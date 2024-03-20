@@ -1,6 +1,6 @@
 import createCache from '@emotion/cache';
 
-import { Inter, JetBrains_Mono } from 'next/font/google';
+// import { Inter, JetBrains_Mono } from 'next/font/google';
 import { extendTheme } from '@mui/joy';
 
 
@@ -14,25 +14,25 @@ export const formLabelStartWidth = 140;
 
 // Theme & Fonts
 
-const inter = Inter({
-  weight: [ /* '300', sm */ '400' /* (undefined, default) */, '500' /* md */, '600' /* lg */, '700' /* xl */],
-  subsets: ['latin'],
-  display: 'swap',
-  fallback: ['Helvetica', 'Arial', 'sans-serif'],
-});
+// const inter = Inter({
+//   weight: [ /* '300', sm */ '400' /* (undefined, default) */, '500' /* md */, '600' /* lg */, '700' /* xl */],
+//   subsets: ['latin'],
+//   display: 'swap',
+//   fallback: ['Helvetica', 'Arial', 'sans-serif'],
+// });
 
-const jetBrainsMono = JetBrains_Mono({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-  fallback: ['monospace'],
-});
+// const jetBrainsMono = JetBrains_Mono({
+//   weight: ['400', '500', '600', '700'],
+//   subsets: ['latin'],
+//   display: 'swap',
+//   fallback: ['monospace'],
+// });
 
 export const appTheme = extendTheme({
-  fontFamily: {
-    body: inter.style.fontFamily,
-    code: jetBrainsMono.style.fontFamily,
-  },
+  // fontFamily: {
+  //   body: inter.style.fontFamily,
+  //   code: jetBrainsMono.style.fontFamily,
+  // },
   colorSchemes: {
     light: {
       palette: {

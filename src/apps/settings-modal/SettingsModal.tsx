@@ -154,9 +154,9 @@ export function SettingsModal(props: {
           }}
         >
           <Tab disableIndicator value={PreferencesTab.Chat} sx={settingTaxSx}>Chat</Tab>
-          <Tab disableIndicator value={PreferencesTab.Voice} sx={settingTaxSx}>Voice</Tab>
+          {/* <Tab disableIndicator value={PreferencesTab.Voice} sx={settingTaxSx}>Voice</Tab>
           <Tab disableIndicator value={PreferencesTab.Draw} sx={settingTaxSx}>Draw</Tab>
-          <Tab disableIndicator value={PreferencesTab.Tools} sx={settingTaxSx}>Tools</Tab>
+          <Tab disableIndicator value={PreferencesTab.Tools} sx={settingTaxSx}>Tools</Tab> */}
         </TabList>
 
         <TabPanel value={PreferencesTab.Chat} variant='outlined' sx={{ p: 'var(--Tabs-gap)', borderRadius: 'md' }}>

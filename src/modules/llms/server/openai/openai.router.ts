@@ -586,6 +586,9 @@ async function openaiGET<TOut extends object>(access: OpenAIAccessSchema, apiPat
 
 async function openaiPOST<TOut extends object, TPostBody extends object>(access: OpenAIAccessSchema, modelRefId: string | null, body: TPostBody, apiPath: string /*, signal?: AbortSignal*/): Promise<TOut> {
   const { headers, url } = openAIAccess(access, modelRefId, apiPath);
+
+  console.log({url: url, cmd: 'POST', header: headers, body: body, moduleName: `OpenAI/${access.dialect}`});
+
   return await fetchJsonOrTRPCError<TOut, TPostBody>(url, 'POST', headers, body, `OpenAI/${access.dialect}`);
 }
 

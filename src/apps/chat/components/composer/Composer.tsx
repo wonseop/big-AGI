@@ -120,7 +120,7 @@ export function Composer(props: {
   const timeToShowTips = useAppStateStore(state => state.usageCount > 2);
   const { novel: explainShiftEnter, touch: touchShiftEnter } = useUICounter('composer-shift-enter');
   const { novel: explainAltEnter, touch: touchAltEnter } = useUICounter('composer-alt-enter');
-  const { novel: explainCtrlEnter, touch: touchCtrlEnter } = useUICounter('composer-ctrl-enter');
+  // const { novel: explainCtrlEnter, touch: touchCtrlEnter } = useUICounter('composer-ctrl-enter');
   const [startupText, setStartupText] = useComposerStartupText();
   const enterIsNewline = useUIPreferencesStore(state => state.enterIsNewline);
   const chatMicTimeoutMs = useChatMicTimeoutMsValue();
@@ -324,7 +324,7 @@ export function Composer(props: {
       }
     }
 
-  }, [actileInterceptKeydown, assistantAbortible, chatModeId, composeText, enterIsNewline, handleSendAction, touchAltEnter, touchCtrlEnter, touchShiftEnter]);
+  }, [actileInterceptKeydown, assistantAbortible, chatModeId, composeText, enterIsNewline, handleSendAction, touchAltEnter, /*touchCtrlEnter,*/ touchShiftEnter]);
 
 
   // Focus mode
@@ -488,7 +488,7 @@ export function Composer(props: {
 
 
   const isText = chatModeId === 'generate-text';
-  const isTextBeam = chatModeId === 'generate-text-beam';
+  // const isTextBeam = chatModeId === 'generate-text-beam';
   const isAppend = chatModeId === 'append-user';
   const isReAct = chatModeId === 'generate-react';
   const isDraw = chatModeId === 'generate-image';
@@ -498,14 +498,14 @@ export function Composer(props: {
   const buttonColor: ColorPaletteProp =
     assistantAbortible ? 'warning'
       : isReAct ? 'success'
-        : isTextBeam ? 'success'
+        // : isTextBeam ? 'success'
           : isDraw ? 'warning'
             : 'primary';
 
   const buttonText =
     isAppend ? 'Write'
       : isReAct ? 'ReAct'
-        : isTextBeam ? 'Beam'
+        // : isTextBeam ? 'Beam'
           : isDraw ? 'Draw'
             : 'Chat';
 
@@ -513,14 +513,14 @@ export function Composer(props: {
     micContinuation ? <AutoModeIcon />
       : isAppend ? <SendIcon sx={{ fontSize: 18 }} />
         : isReAct ? <PsychologyIcon />
-          : isTextBeam ? <ChatBeamIcon /> /* <GavelIcon /> */
+          // : isTextBeam ? <ChatBeamIcon /> /* <GavelIcon /> */
             : isDraw ? <FormatPaintIcon />
               : <TelegramIcon />;
 
   let textPlaceholder: string =
     isDraw ? 'Describe an idea or a drawing...'
       : isReAct ? 'Multi-step reasoning question...'
-        : isTextBeam ? 'Beam: combine the smarts of models...'
+        // : isTextBeam ? 'Beam: combine the smarts of models...'
           : props.isDeveloperMode ? 'Chat with me' + (isDesktop ? ' · drop source' : '') + ' · attach code...'
             : props.capabilityHasT2I ? 'Chat · /beam · /draw · drop files...'
               : 'Chat · /react · drop files...';

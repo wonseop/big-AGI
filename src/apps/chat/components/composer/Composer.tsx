@@ -308,11 +308,11 @@ export function Composer(props: {
       }
 
       // Ctrl (Windows) or Command (Mac) + Enter: send for beaming
-      if ((isMacUser && e.metaKey && !e.ctrlKey) || (!isMacUser && e.ctrlKey && !e.metaKey)) {
-        touchCtrlEnter();
-        handleSendAction('generate-text-beam', composeText);
-        return e.preventDefault();
-      }
+      // if ((isMacUser && e.metaKey && !e.ctrlKey) || (!isMacUser && e.ctrlKey && !e.metaKey)) {
+      //   touchCtrlEnter();
+      //   handleSendAction('generate-text-beam', composeText);
+      //   return e.preventDefault();
+      // }
 
       // Shift: toggles the 'enter is newline'
       if (e.shiftKey)

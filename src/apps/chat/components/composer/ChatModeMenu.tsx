@@ -33,11 +33,11 @@ const ChatModeItems: { [key in ChatModeId]: ChatModeDescription } = {
     description: 'AI Image Generation',
     requiresTTI: true,
   },
-  'generate-text-beam': {
-    label: 'Beam', // Best of, Auto-Prime, Top Pick, Select Best
-    description: 'Combine multiple models', // Smarter: combine...
-    shortcut: 'Ctrl + Enter',
-  },
+  // 'generate-text-beam': {
+  //   label: 'Beam', // Best of, Auto-Prime, Top Pick, Select Best
+  //   description: 'Combine multiple models', // Smarter: combine...
+  //   shortcut: 'Ctrl + Enter',
+  // },
   'generate-react': {
     label: 'Reason + Act', //  · α
     description: 'Answers questions in multiple steps',

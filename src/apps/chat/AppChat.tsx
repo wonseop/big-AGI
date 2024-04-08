@@ -254,9 +254,9 @@ export function AppChat() {
         cHandler.messagesReplace(history);
         return await runAssistantUpdatingState(conversationId, history, chatLLMId, getUXLabsHighPerformance() ? 0 : getInstantAppChatPanesCount());
 
-      case 'generate-text-beam':
-        cHandler.messagesReplace(history);
-        return cHandler.beamInvoke(history, [], null);
+      // case 'generate-text-beam':
+      //   cHandler.messagesReplace(history);
+      //   return cHandler.beamInvoke(history, [], null);
 
       case 'append-user':
         return cHandler.messagesReplace(history);

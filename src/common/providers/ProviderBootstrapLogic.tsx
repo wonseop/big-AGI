@@ -16,20 +16,22 @@ export function ProviderBootstrapLogic(props: { children: React.ReactNode }) {
   useNextLoadProgress(route, events);
 
 
-  // logic
-  const doRedirectToNews = (route === ROUTE_APP_CHAT) && shallRedirectToNews();
+  // F5키 입력시 뉴스로 re-route 되지 않도록 수정
+  // const doRedirectToNews = (route === ROUTE_APP_CHAT) && shallRedirectToNews();
 
 
-  // redirect Chat -> News if fresh news
-  const isRedirecting = React.useMemo(() => {
-    if (doRedirectToNews) {
-      // the async is important (esp. on strict mode second pass)
-      navigateToNews().then(() => markNewsAsSeen());
-      return true;
-    }
-    return false;
-  }, [doRedirectToNews]);
+  // // redirect Chat -> News if fresh news
+  // const isRedirecting = React.useMemo(() => {
+  //   if (doRedirectToNews) {
+  //     // the async is important (esp. on strict mode second pass)
+  //     navigateToNews().then(() => markNewsAsSeen());
+  //     return true;
+  //   }
+  //   return false;
+  // }, [doRedirectToNews]);
 
+  // return isRedirecting ? null : props.children;
 
-  return isRedirecting ? null : props.children;
+  return props.children;
+
 }

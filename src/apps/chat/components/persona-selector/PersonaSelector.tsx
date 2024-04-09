@@ -250,7 +250,7 @@ export function PersonaSelector(props: { conversationId: DConversationId, runExa
       }}>
 
         {/* [row 0] ...  Edit mode [ ] */}
-        <Box sx={{
+        {/* <Box sx={{
           gridColumn: '1 / -1',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
@@ -258,14 +258,14 @@ export function PersonaSelector(props: { conversationId: DConversationId, runExa
             AI Persona
           </Typography>
           <Tooltip disableInteractive title={editMode ? 'Done Editing' : 'Edit Tiles'}>
-            <IconButton size='sm' onClick={toggleEditMode} sx={{ my: '-0.25rem' /* absorb the button padding */ }}>
+            <IconButton size='sm' onClick={toggleEditMode} sx={{ my: '-0.25rem' }}>
               {editMode ? <DoneIcon /> : <EditIcon />}
             </IconButton>
           </Tooltip>
-        </Box>
+        </Box> */}
 
         {/* Personas Tiles */}
-        {visiblePurposeIDs.map((spId: SystemPurposeId) => {
+        {/* {visiblePurposeIDs.map((spId: SystemPurposeId) => {
           const isActive = systemPurposeId === spId;
           const systemPurpose = SystemPurposes[spId];
           return (
@@ -281,10 +281,10 @@ export function PersonaSelector(props: { conversationId: DConversationId, runExa
               onClick={() => editMode ? toggleHiddenPurposeId(spId) : handlePurposeChanged(spId)}
             />
           );
-        })}
+        })} */}
 
         {/* Persona Creator Tile */}
-        {(editMode || !hidePersonaCreator) && (
+        {/* {(editMode || !hidePersonaCreator) && (
           <Tile
             text='Persona Creator'
             symbol='🎭'
@@ -297,28 +297,23 @@ export function PersonaSelector(props: { conversationId: DConversationId, runExa
               backgroundColor: 'neutral.softDisabledBg',
             }}
           />
-        )}
+        )} */}
 
 
         {/* [row -3] Description */}
-        <Box sx={{ gridColumn: '1 / -1', mt: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+        {/* <Box sx={{ gridColumn: '1 / -1', mt: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
 
-
-          {/* Description*/}
           <Typography level='body-sm' sx={{ color: 'text.primary' }}>
             {!selectedPurpose
               ? 'Cannot find the former persona' + (systemPurposeId ? ` "${systemPurposeId}"` : '')
               : selectedPurpose?.description || 'No description available'}
           </Typography>
-          {/* Examples Toggle */}
-          {/*<Box sx={{ display: 'flex', flexFlow: 'row wrap', flexShrink: 1 }}>*/}
           {fourExamples && showExamplescomponent}
           {!isCustomPurpose && showPromptComponent}
-          {/*</Box>*/}
-        </Box>
+        </Box> */}
 
         {/* [row -3] Example incipits */}
-        {systemPurposeId !== 'Custom' && (
+        {/* {systemPurposeId !== 'Custom' && (
           <ExpanderControlledBox expanded={showExamples || (!isCustomPurpose && showPrompt)} sx={{ gridColumn: '1 / -1', pt: 1 }}>
             {showExamples && (
               <List
@@ -364,7 +359,7 @@ export function PersonaSelector(props: { conversationId: DConversationId, runExa
                       variant='plain' color='neutral' size='sm'
                       endDecorator={<EditNoteIcon />}
                       onClick={() => handleSwitchToCustom(bareBonesPromptMixer(selectedPurpose?.systemMessage || 'No system message available', chatLLM?.id))}
-                      sx={{ ml: 'auto', my: '-0.25rem' /* absorb the button padding */ }}
+                      sx={{ ml: 'auto', my: '-0.25rem' }}
                     >
                       Custom
                     </Button>
@@ -383,10 +378,10 @@ export function PersonaSelector(props: { conversationId: DConversationId, runExa
               </Card>
             )}
           </ExpanderControlledBox>
-        )}
+        )} */}
 
         {/* [row -1] Custom Prompt box */}
-        {systemPurposeId === 'Custom' && (
+        {/* {systemPurposeId === 'Custom' && (
           <Textarea
             autoFocus
             variant='outlined'
@@ -410,7 +405,7 @@ export function PersonaSelector(props: { conversationId: DConversationId, runExa
               lineHeight: lineHeightTextareaMd,
             }}
           />
-        )}
+        )} */}
 
       </Box>
 

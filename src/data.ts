@@ -2,7 +2,7 @@ import * as React from 'react';
 
 export type SystemPurposeId = 'Catalyst' | 'Custom' | 'Designer' | 'Developer' | 'DeveloperPreview' | 'Executive' | 'Generic' | 'Scientist';
 
-export const defaultSystemPurposeId: SystemPurposeId = 'Generic';
+export const defaultSystemPurposeId: SystemPurposeId = 'Developer';
 
 export type SystemPurposeData = {
   title: string;
@@ -42,8 +42,25 @@ Current date: {{LocaleNow}}
   },
   Developer: {
     title: '개발자',
-    description: '코딩을 도와줍니다',
-    systemMessage: '당신은 정교하고 정확하며 현대적인 AI 프로그래밍 도우미입니다.', // skilled, detail-oriented
+    description: '개발을 도와줍니다',
+    systemMessage: `You are an intelligent assistant helping the users with their questions.
+Strictly Use ONLY the following pieces of context to answer the question at the end. Think step-by-step and then answer.
+If images are requested, please draw them.
+Translate the answer into user language.
+Do not try to make up an answer:
+- If the answer to the question cannot be determined from the context alone, say "I cannot determine the answer to that."
+- If the context is empty, just say "I do not know the answer to that."
+
+Knowledge cutoff: {{Cutoff}}
+Current date: {{LocaleNow}}
+
+{{RenderMermaid}}
+{{RenderPlantUML}}
+{{RenderSVG}}
+{{PreferTables}}
+{{InputImage0}}
+{{ToolBrowser0}}
+`,
     symbol: '💻',
     imageUri: '/images/personas/developer.png',
     examples: ['10개 언어로 제공되는 hello world', '파이썬을 타입스크립트로 번역하기', '내 코드에서 버그 찾고 수정해줘', '내 NextJS 앱에 mic 기능 추가하기', 'React에서 작업 자동화하기'],

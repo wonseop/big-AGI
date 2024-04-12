@@ -488,11 +488,20 @@ export function oobaboogaModelToModelDescription(modelId: string, created: numbe
 
 
 // [S-Core]
-const _knownSCoreChatModels: ManualMappings = [];
+const _knownSCoreChatModels: ManualMappings = [
+    // Open Mixtral (8x7B)
+    {
+      idPrefix: 'Synatra-Mixtral-8x7B_q4_K_M',
+      label: 'Synatra Mixtral 8x7B (Q4)',
+      description: 'Mixtral 8x7B model for Korean',
+      contextWindow: 8000,
+      maxCompletionTokens: 2048,
+      interfaces: [LLM_IF_OAI_Chat],
+    },
+];
 
 const _knownSCoreNonChatModels: string[] = [
-  'None', 'text-curie-001', 'text-davinci-002', 'all-mpnet-base-v2', 'text-embedding-ada-002',
-  /* 'gpt-3.5-turbo' // used to be here, but now it's the way to select the activly loaded ooababooga model */
+  'None', 'Synatra-Mixtral-8x7B_q4_K_M',
 ];
 
 export function scoreModelToModelDescription(modelId: string, created: number): ModelDescriptionSchema {

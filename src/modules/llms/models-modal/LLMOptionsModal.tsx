@@ -99,9 +99,9 @@ export function LLMOptionsModal(props: { id: DLLMId, onClose: () => void }) {
           <Tooltip title='Use this Model for "fast" features, such as Auto-Title, Summarize, etc.'>
             <Button variant={isFastLLM ? 'solid' : undefined} onClick={() => setFastLLMId(isFastLLM ? null : props.id)}>Fast</Button>
           </Tooltip>
-          <Tooltip title='Use this Model for "function calling" and other structured features, such as Auto-Chart, Auto-Follow-ups, etc.'>
+          {/* <Tooltip title='Use this Model for "function calling" and other structured features, such as Auto-Chart, Auto-Follow-ups, etc.'>
             <Button variant={isFuncLLM ? 'solid' : undefined} onClick={() => setFuncLLMId(isFuncLLM ? null : props.id)}>Func</Button>
-          </Tooltip>
+          </Tooltip> */}
         </ButtonGroup>
       </FormControl>
 

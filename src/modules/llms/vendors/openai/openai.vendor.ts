@@ -12,7 +12,7 @@ import { OpenAISourceSetup } from './OpenAISourceSetup';
 
 // shared constants
 export const FALLBACK_LLM_RESPONSE_TOKENS = 1024;
-export const FALLBACK_LLM_TEMPERATURE = 0.1;
+export const FALLBACK_LLM_TEMPERATURE = 0.0;
 
 
 // special symbols

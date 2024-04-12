@@ -27,7 +27,7 @@ export const ModelVendorSCore: IModelVendor<SourceSetupSCore, OpenAIAccessSchema
 
   // functions
   initializeSetup: (): SourceSetupSCore => ({
-    oaiHost: 'http://172.21.133.99:8000',
+    oaiHost: 'http://172.21.133.99:4444',
   }),
   getTransportAccess: (partialSetup): OpenAIAccessSchema => ({
     dialect: 'score',

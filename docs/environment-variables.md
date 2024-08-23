@@ -27,6 +27,7 @@ AZURE_OPENAI_API_ENDPOINT=
 AZURE_OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
 ANTHROPIC_API_HOST=
+DEEPSEEK_API_KEY=
 GEMINI_API_KEY=
 GROQ_API_KEY=
 LOCALAI_API_HOST=
@@ -40,24 +41,27 @@ TOGETHERAI_API_KEY=
 # Model Observability: Helicone
 HELICONE_API_KEY=
 
-# Text-To-Speech
-ELEVENLABS_API_KEY=
-ELEVENLABS_API_HOST=
-ELEVENLABS_VOICE_ID=
-# Text-To-Image
-PRODIA_API_KEY=
-# Google Custom Search
-GOOGLE_CLOUD_API_KEY=
-GOOGLE_CSE_ID=
 # Browse
 PUPPETEER_WSS_ENDPOINT=
 
-# Backend Analytics
-BACKEND_ANALYTICS=
+# Search
+GOOGLE_CLOUD_API_KEY=
+GOOGLE_CSE_ID=
+
+# Text-To-Speech: ElevenLabs
+ELEVENLABS_API_KEY=
+ELEVENLABS_API_HOST=
+ELEVENLABS_VOICE_ID=
+# Text-To-Image: Prodia
+PRODIA_API_KEY=
 
 # Backend HTTP Basic Authentication (see `deploy-authentication.md` for turning on authentication)
 HTTP_BASIC_AUTH_USERNAME=
 HTTP_BASIC_AUTH_PASSWORD=
+
+# Backend Analytics Flags
+BACKEND_ANALYTICS=
+
 
 # Frontend variables
 NEXT_PUBLIC_GA4_MEASUREMENT_ID=
@@ -89,9 +93,10 @@ requiring the user to enter an API key
 | `AZURE_OPENAI_API_KEY`      | Azure OpenAI API key, see [config-azure-openai.md](config-azure-openai.md)                                                    | Optional, but if set `AZURE_OPENAI_API_ENDPOINT` must also be set |
 | `ANTHROPIC_API_KEY`         | The API key for Anthropic                                                                                                     | Optional                                                          |
 | `ANTHROPIC_API_HOST`        | Changes the backend host for the Anthropic vendor, to enable platforms such as [config-aws-bedrock.md](config-aws-bedrock.md) | Optional                                                          |
+| `DEEPSEEK_API_KEY`          | The API key for Deepseek AI                                                                                                   | Optional                                                          |
 | `GEMINI_API_KEY`            | The API key for Google AI's Gemini                                                                                            | Optional                                                          |
 | `GROQ_API_KEY`              | The API key for Groq Cloud                                                                                                    | Optional                                                          |
-| `LOCALAI_API_HOST`          | Sets the URL of the LocalAI server, or defaults to http://127.0.0.1:8080                                                      | Optional                                                          |  
+| `LOCALAI_API_HOST`          | Sets the URL of the LocalAI server, or defaults to http://127.0.0.1:8080                                                      | Optional                                                          |
 | `LOCALAI_API_KEY`           | The (Optional) API key for LocalAI                                                                                            | Optional                                                          |
 | `MISTRAL_API_KEY`           | The API key for Mistral                                                                                                       | Optional                                                          |
 | `OLLAMA_API_HOST`           | Changes the backend host for the Ollama vendor. See [config-local-ollama.md](config-local-ollama)                             |                                                                   |
@@ -128,7 +133,7 @@ Enable the app to Talk, Draw, and Google things up.
 | `GOOGLE_CSE_ID`            | Google Custom/Programmable Search Engine ID - [Link to PSE](https://programmablesearchengine.google.com/)               |
 | **Browse**                 |                                                                                                                         |
 | `PUPPETEER_WSS_ENDPOINT`   | Puppeteer WebSocket endpoint - used for browsing (pade downloadeing), etc.                                              |
-| **Backend**                |                                                                                                                         | 
+| **Backend**                |                                                                                                                         |
 | `BACKEND_ANALYTICS`        | Semicolon-separated list of analytics flags (see backend.analytics.ts). Flags: `domain` logs the responding domain.     |
 | `HTTP_BASIC_AUTH_USERNAME` | See the [Authentication](deploy-authentication.md) guide. Username for HTTP Basic Authentication.                       |
 | `HTTP_BASIC_AUTH_PASSWORD` | Password for HTTP Basic Authentication.                                                                                 |
@@ -147,5 +152,5 @@ The value of these variables are passed to the frontend (Web UI) - make sure the
 
 ---
 
-For a higher level overview of backend code and environemnt customization,
+For a higher level overview of backend code and environment customization,
 see the [big-AGI Customization](customizations.md) guide.

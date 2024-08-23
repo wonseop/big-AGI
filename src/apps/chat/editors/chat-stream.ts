@@ -2,7 +2,7 @@ import type { DLLMId } from '~/modules/llms/store-llms';
 import type { StreamingClientUpdate } from '~/modules/llms/vendors/unifiedStreamingClient';
 import { autoSuggestions } from '~/modules/aifn/autosuggestions/autoSuggestions';
 import { conversationAutoTitle } from '~/modules/aifn/autotitle/autoTitle';
-import { llmStreamingChatGenerate } from '~/modules/llms/llm.client';
+import { llmStreamingChatGenerate, VChatContextRef, VChatMessageIn, VChatStreamContextName } from '~/modules/llms/llm.client';
 import { speakText } from '~/modules/elevenlabs/elevenlabs.client';
 
 import type { DMessage } from '~/common/state/store-chats';
@@ -31,9 +31,11 @@ export async function runAssistantUpdatingState(conversationId: string, history:
   cHandler.setAbortController(abortController);
 
   // stream the assistant's messages
-  await streamAssistantMessage(
+  const messageStatus = await streamAssistantMessage(
     assistantLlmId,
-    history,
+    history.map((m): VChatMessageIn => ({ role: m.role, content: m.text })),
+    'conversation',
+    conversationId,
     parallelViewCount,
     autoSpeak,
     (update) => cHandler.messageEdit(assistantMessageId, update, false),
@@ -41,6 +43,7 @@ export async function runAssistantUpdatingState(conversationId: string, history:
   );
 
   // clear to send, again
+  // FIXME: race condition?
   cHandler.setAbortController(null);
 
   if (autoTitleChat) {
@@ -50,26 +53,31 @@ export async function runAssistantUpdatingState(conversationId: string, history:
 
   if (autoSuggestDiagrams || autoSuggestQuestions)
     autoSuggestions(conversationId, assistantMessageId, autoSuggestDiagrams, autoSuggestQuestions);
+
+  return messageStatus.outcome === 'success';
 }
 
 type StreamMessageOutcome = 'success' | 'aborted' | 'errored';
+type StreamMessageStatus = { outcome: StreamMessageOutcome, errorMessage?: string };
 
 export async function streamAssistantMessage(
   llmId: DLLMId,
-  history: DMessage[],
+  messagesHistory: VChatMessageIn[],
+  contextName: VChatStreamContextName,
+  contextRef: VChatContextRef,
   throttleUnits: number, // 0: disable, 1: default throttle (12Hz), 2+ reduce the message frequency with the square root
   autoSpeak: ChatAutoSpeakType,
   editMessage: (update: Partial<DMessage>) => void,
   abortSignal: AbortSignal,
-): Promise<StreamMessageOutcome> {
+): Promise<StreamMessageStatus> {
 
-  let returnOutcome: StreamMessageOutcome = 'success';
+  const returnStatus: StreamMessageStatus = {
+    outcome: 'success',
+    errorMessage: undefined,
+  };
 
   // speak once
   let spokenLine = false;
-
-  const messages = history.map(({ role, text }) => ({ role, content: text }));
-
 
   // Throttling setup
   let lastCallTime = 0;
@@ -88,7 +96,7 @@ export async function streamAssistantMessage(
   const incrementalAnswer: Partial<DMessage> = { text: '' };
 
   try {
-    await llmStreamingChatGenerate(llmId, messages, null, null, abortSignal, (update: StreamingClientUpdate) => {
+    await llmStreamingChatGenerate(llmId, messagesHistory, contextName, contextRef, null, null, abortSignal, (update: StreamingClientUpdate) => {
       const textSoFar = update.textSoFar;
 
       // grow the incremental message
@@ -118,9 +126,10 @@ export async function streamAssistantMessage(
       console.error('Fetch request error:', error);
       const errorText = ` [Issue: ${error.message || (typeof error === 'string' ? error : 'Chat stopped.')}]`;
       incrementalAnswer.text = (incrementalAnswer.text || '') + errorText;
-      returnOutcome = 'errored';
+      returnStatus.outcome = 'errored';
+      returnStatus.errorMessage = error.message;
     } else
-      returnOutcome = 'aborted';
+      returnStatus.outcome = 'aborted';
   }
 
   // Optimized:
@@ -132,5 +141,5 @@ export async function streamAssistantMessage(
   if ((autoSpeak === 'all' || autoSpeak === 'firstLine') && incrementalAnswer.text && !spokenLine && !abortSignal.aborted)
     void speakText(incrementalAnswer.text);
 
-  return returnOutcome;
+  return returnStatus;
 }

@@ -9,7 +9,7 @@ Docker ensures faster development cycles, easier collaboration, and seamless env
    ```bash
    git clone https://github.com/enricoros/big-agi.git
    cd big-agi
-   ``` 
+   ```
 2. **Build the Docker Image**: Build a local docker image from the provided Dockerfile:
    ```bash
    docker build -t big-agi .
@@ -56,6 +56,17 @@ To make local services running on your host machine accessible to a Docker conta
 |:------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Windows and macOS | Use the special DNS name `host.docker.internal` to refer to the host machine from within the Docker container. No additional network configuration is required. Access local services using `host.docker.internal:<PORT>`.                                                                                                                                                                   |
 | Linux             | Two options: *A*. Use <ins>--network="host"</ins> (`docker run --network="host" -d big-agi`) when running the Docker container to merge the container within the host network stack; however, this reduces container isolation. Alternatively: *B*. Connect to local services <ins>using the host's IP address</ins> directly, as host.docker.internal is not available by default on Linux. |
+
+<br/>
+
+### Reverse Proxy Configuration
+
+A reverse proxy is a server that sits in front of big-AGI's container and can forwards web
+requests to it. Often used to run multiple web applications, expose them to the internet,
+increase security.
+
+If you're deploying big-AGI behind a reverse proxy, you may want to see
+our [Reverse Proxy Deployment Guide](deploy-reverse-proxy.md) for more information.
 
 <br/>
 

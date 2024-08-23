@@ -13,6 +13,7 @@ export interface BackendCapabilities {
   hasImagingProdia: boolean;
   hasLlmAnthropic: boolean;
   hasLlmAzureOpenAI: boolean;
+  hasLlmDeepseek: boolean;
   hasLlmGemini: boolean;
   hasLlmGroq: boolean;
   hasLlmLocalAIHost: boolean;
@@ -24,6 +25,7 @@ export interface BackendCapabilities {
   hasLlmPerplexity: boolean;
   hasLlmTogetherAI: boolean;
   hasVoiceElevenLabs: boolean;
+  llmConfigHash: string;
 }
 
 interface BackendStore extends BackendCapabilities {
@@ -41,6 +43,7 @@ const useBackendCapabilitiesStore = create<BackendStore>()(
     hasImagingProdia: false,
     hasLlmAnthropic: false,
     hasLlmAzureOpenAI: false,
+    hasLlmDeepseek: false,
     hasLlmGemini: false,
     hasLlmGroq: false,
     hasLlmLocalAIHost: false,
@@ -52,6 +55,7 @@ const useBackendCapabilitiesStore = create<BackendStore>()(
     hasLlmPerplexity: false,
     hasLlmTogetherAI: false,
     hasVoiceElevenLabs: false,
+    llmConfigHash: '',
 
     loadedCapabilities: false,
     setCapabilities: (capabilities: Partial<BackendCapabilities>) =>
@@ -68,6 +72,6 @@ export function useKnowledgeOfBackendCaps(): [boolean, (capabilities: Partial<Ba
   return useBackendCapabilitiesStore(useShallow(state => [state.loadedCapabilities, state.setCapabilities]));
 }
 
-export function backendCapabilities(): BackendCapabilities {
+export function getBackendCapabilities(): BackendCapabilities {
   return useBackendCapabilitiesStore.getState();
 }

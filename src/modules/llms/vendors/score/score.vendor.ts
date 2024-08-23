@@ -15,7 +15,7 @@ export interface SourceSetupSCore {
 
 export const ModelVendorSCore: IModelVendor<SourceSetupSCore, OpenAIAccessSchema, LLMOptionsOpenAI> = {
   id: 'score',
-  name: 'S-Core',
+  name: 'S-Core RAG',
   rank: 23,
   location: 'local',
   instanceLimit: 1,
@@ -39,7 +39,7 @@ export const ModelVendorSCore: IModelVendor<SourceSetupSCore, OpenAIAccessSchema
   }),
 
   // OpenAI transport (s-core dialect in 'access')
-  rpcUpdateModelsQuery: ModelVendorOpenAI.rpcUpdateModelsQuery,
+  rpcUpdateModelsOrThrow: ModelVendorOpenAI.rpcUpdateModelsOrThrow,
   rpcChatGenerateOrThrow: ModelVendorOpenAI.rpcChatGenerateOrThrow,
   streamingChatGenerateOrThrow: ModelVendorOpenAI.streamingChatGenerateOrThrow,
 };

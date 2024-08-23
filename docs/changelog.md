@@ -5,12 +5,51 @@ by release.
 
 - For the live roadmap, please see [the GitHub project](https://github.com/users/enricoros/projects/4/views/2)
 
-### 1.15.0 - Mar 2024
+### 1.17.0 - Jun 2024
 
-Prediction: OpenAI will release GPT-5 on March 14, 2024. We will support it on day 1.
-
-- milestone: [1.15.0](https://github.com/enricoros/big-agi/milestone/15)
+- milestone: [1.17.0](https://github.com/enricoros/big-agi/milestone/17)
 - work in progress: [big-AGI open roadmap](https://github.com/users/enricoros/projects/4/views/2), [help here](https://github.com/users/enricoros/projects/4/views/4)
+
+### What's New in 1.16.1...1.16.7 · Aug 7, 2024 (patch releases)
+
+- 1.16.7: OpenAI support for GPT-4o 2024-08-06
+- 1.16.6: Groq support for Llama 3.1 models
+- 1.16.5: GPT-4o Mini support
+- 1.16.4: 8192 tokens support for Claude 3.5 Sonnet
+- 1.16.3: Anthropic Claude 3.5 Sonnet model support
+- 1.16.2: Improve web downloads, as text, markdwon, or HTML
+- 1.16.2: Proper support for Gemini models
+- 1.16.2: Added the latest Mistral model
+- 1.16.2: Tokenizer support for gpt-4o
+- 1.16.2: Updates to Beam
+- 1.16.1: Support for the new OpenAI GPT-4o 2024-05-13 model
+
+### What's New in 1.16.0 · May 9, 2024 · Crystal Clear
+
+- [Beam](https://big-agi.com/blog/beam-multi-model-ai-reasoning) core and UX improvements based on user feedback
+- Chat cost estimation 💰 (enable it in Labs / hover the token counter)
+- Save/load chat files with Ctrl+S / Ctrl+O on desktop
+- Major enhancements to the Auto-Diagrams tool
+- YouTube Transcriber Persona for chatting with video content, [#500](https://github.com/enricoros/big-AGI/pull/500)
+- Improved formula rendering (LaTeX), and dark-mode diagrams, [#508](https://github.com/enricoros/big-AGI/issues/508), [#520](https://github.com/enricoros/big-AGI/issues/520)
+- Models update: **Anthropic**, **Groq**, **Ollama**, **OpenAI**, **OpenRouter**, **Perplexity**
+- Code soft-wrap, chat text selection toolbar, 3x faster on Apple silicon, and more [#517](https://github.com/enricoros/big-AGI/issues/517), [507](https://github.com/enricoros/big-AGI/pull/507)
+- Developers: update the LLMs data structures
+
+### What's New in 1.15.1 · April 10, 2024 (minor release, models support)
+
+- Support for the newly released Gemini Pro 1.5 models
+- Support for the new OpenAI 2024-04-09 Turbo models
+- Resilience fixes after the large success of 1.15.0
+
+### What's New in 1.15.0 · April 1, 2024 · Beam
+
+- ⚠️ [**Beam**: the multi-model AI chat](https://big-agi.com/blog/beam-multi-model-ai-reasoning). find better answers, faster - a game-changer for brainstorming, decision-making, and creativity. [#443](https://github.com/enricoros/big-AGI/issues/443)
+- Managed Deployments **Auto-Configuration**: simplify the UI mdoels setup with backend-set models. [#436](https://github.com/enricoros/big-AGI/issues/436)
+- Message **Starring ⭐**: star important messages within chats, to attach them later. [#476](https://github.com/enricoros/big-AGI/issues/476)
+- Enhanced the default Persona
+- Fixes to Gemini models and SVGs, improvements to UI and icons
+- Beast release, over 430 commits, 10,000+ lines changed: [release notes](https://github.com/enricoros/big-AGI/releases/tag/v1.15.0), and changes [v1.14.1...v1.15.0](https://github.com/enricoros/big-AGI/compare/v1.14.1...v1.15.0)
 
 ### What's New in 1.14.1 · March 7, 2024 · Modelmorphic
 

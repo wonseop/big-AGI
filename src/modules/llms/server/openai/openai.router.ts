@@ -11,13 +11,19 @@ import { Brand } from '~/common/app.config';
 import { fixupHost } from '~/common/util/urlUtils';
 
 import { OpenAIWire, WireOpenAICreateImageOutput, wireOpenAICreateImageOutputSchema, WireOpenAICreateImageRequest } from './openai.wiretypes';
-import { azureModelToModelDescription, groqModelToModelDescription, lmStudioModelToModelDescription, localAIModelToModelDescription, mistralModelsSort, mistralModelToModelDescription, oobaboogaModelToModelDescription, scoreModelToModelDescription, openAIModelToModelDescription, openRouterModelFamilySortFn, openRouterModelToModelDescription, perplexityAIModelDescriptions, perplexityAIModelSort, togetherAIModelsToModelDescriptions } from './models.data';
-import { llmsChatGenerateWithFunctionsOutputSchema, llmsListModelsOutputSchema, ModelDescriptionSchema } from '../llm.server.types';
+import { azureModelToModelDescription, deepseekModelToModelDescription, groqModelSortFn, groqModelToModelDescription, lmStudioModelToModelDescription, localAIModelToModelDescription, mistralModelsSort, mistralModelToModelDescription, oobaboogaModelToModelDescription, scoreModelToModelDescription, openAIModelFilter, openAIModelToModelDescription, openRouterModelFamilySortFn, openRouterModelToModelDescription, perplexityAIModelDescriptions, perplexityAIModelSort, togetherAIModelsToModelDescriptions } from './models.data';
+import { llmsChatGenerateWithFunctionsOutputSchema, llmsGenerateContextSchema, llmsListModelsOutputSchema, ModelDescriptionSchema } from '../llm.server.types';
 import { wilreLocalAIModelsApplyOutputSchema, wireLocalAIModelsAvailableOutputSchema, wireLocalAIModelsListOutputSchema } from './localai.wiretypes';
 
+
+// module configuration
+const ABERRATION_FIXUP_SQUASH = '\n\n\n---\n\n\n';
+
+
 const openAIDialects = z.enum([
-  'azure', 'groq', 'lmstudio', 'localai', 'mistral', 'oobabooga', 'score', 'openai', 'openrouter', 'perplexity', 'togetherai',
+  'azure', 'deepseek', 'groq', 'lmstudio', 'localai', 'mistral', 'oobabooga', 'score', 'openai', 'openrouter', 'perplexity', 'togetherai',
 ]);
+type OpenAIDialects = z.infer<typeof openAIDialects>;
 
 export const openAIAccessSchema = z.object({
   dialect: openAIDialects,
@@ -66,18 +72,22 @@ const listModelsInputSchema = z.object({
 
 const chatGenerateWithFunctionsInputSchema = z.object({
   access: openAIAccessSchema,
-  model: openAIModelSchema, history: openAIHistorySchema,
-  functions: openAIFunctionsSchema.optional(), forceFunctionName: z.string().optional(),
+  model: openAIModelSchema,
+  history: openAIHistorySchema,
+  functions: openAIFunctionsSchema.optional(),
+  forceFunctionName: z.string().optional(),
+  context: llmsGenerateContextSchema.optional(),
 });
 
 const createImagesInputSchema = z.object({
   access: openAIAccessSchema,
-  request: z.object({
+  // for this object sync with <> wireOpenAICreateImageRequestSchema
+  config: z.object({
     prompt: z.string(),
     count: z.number().min(1),
-    model: z.enum(['dall-e-2', 'dall-e-3']),
+    model: z.enum(['dall-e-2', 'dall-e-3' /*, 'stablediffusion' for [LocalAI] */]),
     quality: z.enum(['standard', 'hd']),
-    asUrl: z.boolean(), // if false, returns a base64 encoded data Url
+    responseFormat: z.enum(['url', 'b64_json']), /* udpated to directly match OpenAI's formats - shall have an intermediate representation instead? */
     size: z.enum(['256x256', '512x512', '1024x1024', '1792x1024', '1024x1792']),
     style: z.enum(['natural', 'vivid']),
   }),
@@ -101,7 +111,7 @@ export const llmOpenAIRouter = createTRPCRouter({
 
       // [Azure]: use an older 'deployments' API to enumerate the models, and a modified OpenAI id to description mapping
       if (access.dialect === 'azure') {
-        const azureModels = await openaiGET(access, `/openai/deployments?api-version=2023-03-15-preview`);
+        const azureModels = await openaiGETOrThrow(access, `/openai/deployments?api-version=2023-03-15-preview`);
 
         const wireAzureListDeploymentsSchema = z.object({
           data: z.array(z.object({
@@ -139,7 +149,7 @@ export const llmOpenAIRouter = createTRPCRouter({
 
 
       // [non-Azure]: fetch openAI-style for all but Azure (will be then used in each dialect)
-      const openAIWireModelsResponse = await openaiGET<OpenAIWire.Models.Response>(access, '/v1/models');
+      const openAIWireModelsResponse = await openaiGETOrThrow<OpenAIWire.Models.Response>(access, '/v1/models');
 
       // [Together] missing the .data property
       if (access.dialect === 'togetherai')
@@ -159,9 +169,15 @@ export const llmOpenAIRouter = createTRPCRouter({
       // every dialect has a different way to enumerate models - we execute the mapping on the server side
       switch (access.dialect) {
 
+        case 'deepseek':
+          models = openAIModels
+            .map(({ id }) => deepseekModelToModelDescription(id));
+          break;
+
         case 'groq':
           models = openAIModels
-            .map(groqModelToModelDescription);
+            .map(groqModelToModelDescription)
+            .sort(groqModelSortFn);
           break;
 
         case 'lmstudio':
@@ -200,7 +216,7 @@ export const llmOpenAIRouter = createTRPCRouter({
           models = openAIModels
 
             // limit to only 'gpt' and 'non instruct' models
-            .filter(model => model.id.includes('gpt') && !model.id.includes('-instruct'))
+            .filter(openAIModelFilter)
 
             // to model description
             .map((model): ModelDescriptionSchema => openAIModelToModelDescription(model.id, model.created))
@@ -211,11 +227,17 @@ export const llmOpenAIRouter = createTRPCRouter({
               // fix the OpenAI model names to be chronologically sorted
               function remapReleaseDate(id: string): string {
                 return id
-                  .replace('0314', '230314')
-                  .replace('0613', '230613')
-                  .replace('1106', '231106')
-                  .replace('0125', '240125');
+                  .replace('0314', '2023-03-14')
+                  .replace('0613', '2023-06-13')
+                  .replace('1106', '2023-11-06')
+                  .replace('0125', '2024-01-25');
               }
+
+              // stuff with '[legacy]' at the bottom
+              const aLegacy = a.label.includes('[legacy]');
+              const bLegacy = b.label.includes('[legacy]');
+              if (aLegacy !== bLegacy)
+                return aLegacy ? 1 : -1;
 
               // due to using by-label, sorting doesn't require special cases anymore
               return remapReleaseDate(b.label).localeCompare(remapReleaseDate(a.label));
@@ -260,18 +282,22 @@ export const llmOpenAIRouter = createTRPCRouter({
     .output(llmsChatGenerateWithFunctionsOutputSchema)
     .mutation(async ({ input }) => {
 
-      const { access, model, history, functions, forceFunctionName } = input;
+      const { access, model, history, functions, forceFunctionName, context } = input;
       const isFunctionsCall = !!functions && functions.length > 0;
 
-      const wireCompletions = await openaiPOST<OpenAIWire.ChatCompletion.Response, OpenAIWire.ChatCompletion.Request>(
-        access, model.id,
-        openAIChatCompletionPayload(model, history, isFunctionsCall ? functions : null, forceFunctionName ?? null, 1, false),
-        '/v1/chat/completions',
+      const completionsBody = openAIChatCompletionPayload(access.dialect, model, history, isFunctionsCall ? functions : null, forceFunctionName ?? null, 1, false);
+      const wireCompletions = await openaiPOSTOrThrow<OpenAIWire.ChatCompletion.Response, OpenAIWire.ChatCompletion.Request>(
+        access, model.id, completionsBody, '/v1/chat/completions',
       );
 
       // expect a single output
-      if (wireCompletions?.choices?.length !== 1)
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `[OpenAI Issue] Expected 1 completion, got ${wireCompletions?.choices?.length}` });
+      if (wireCompletions?.choices?.length !== 1) {
+        console.error(`[POST] llmOpenAI.chatGenerateWithFunctions: ${access.dialect}: ${context?.name || 'no context'}: unexpected output${forceFunctionName ? ` (fn: ${forceFunctionName})` : ''}:`, model.id, wireCompletions?.choices);
+        throw new TRPCError({
+          code: 'UNPROCESSABLE_CONTENT',
+          message: `[OpenAI Issue] Expected 1 completion, got ${wireCompletions?.choices?.length}`,
+        });
+      }
       let { message, finish_reason } = wireCompletions.choices[0];
 
       // LocalAI hack/workaround, until https://github.com/go-skynet/LocalAI/issues/788 is fixed
@@ -285,30 +311,35 @@ export const llmOpenAIRouter = createTRPCRouter({
         : parseChatGenerateOutput(message as OpenAIWire.ChatCompletion.ResponseMessage, finish_reason);
     }),
 
-  /* [OpenAI] images/generations */
+  /* [OpenAI/LocalAI] images/generations */
   createImages: publicProcedure
     .input(createImagesInputSchema)
     .output(t2iCreateImagesOutputSchema)
-    .mutation(async ({ input: { access, request } }) => {
+    .mutation(async ({ input: { access, config } }) => {
 
       // Validate input
-      if (request.model === 'dall-e-3' && request.count > 1)
+      if (config.model === 'dall-e-3' && config.count > 1)
         throw new TRPCError({ code: 'BAD_REQUEST', message: `[OpenAI Issue] dall-e-3 model does not support more than 1 image` });
 
+      // images/generations request body
+      const requestBody: WireOpenAICreateImageRequest = {
+        prompt: config.prompt,
+        model: config.model,
+        n: config.count,
+        quality: config.quality,
+        response_format: config.responseFormat,
+        size: config.size,
+        style: config.style,
+        user: 'big-AGI',
+      };
+
+      // [LocalAI] Fix: LocalAI does not want the 'response_format' field
+      if (access.dialect === 'localai')
+        delete requestBody.response_format;
+
       // create 1 image (dall-e-3 won't support more than 1, so better transfer the burden to the client)
-      const wireOpenAICreateImageOutput = await openaiPOST<WireOpenAICreateImageOutput, WireOpenAICreateImageRequest>(
-        access, null,
-        {
-          prompt: request.prompt,
-          model: request.model,
-          n: request.count,
-          quality: request.quality,
-          response_format: request.asUrl ? 'url' : 'b64_json',
-          size: request.size,
-          style: request.style,
-          user: 'big-agi',
-        },
-        '/v1/images/generations',
+      const wireOpenAICreateImageOutput = await openaiPOSTOrThrow<WireOpenAICreateImageOutput, WireOpenAICreateImageRequest>(
+        access, null, requestBody, '/v1/images/generations',
       );
 
       // expect a single image and as URL
@@ -318,7 +349,7 @@ export const llmOpenAIRouter = createTRPCRouter({
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `[OpenAI Issue] Expected a url, got a b64_json (which is not implemented yet)` });
         return {
           imageUrl: image.url,
-          altText: image.revised_prompt || request.prompt,
+          altText: image.revised_prompt || config.prompt,
         };
       });
     }),
@@ -329,7 +360,7 @@ export const llmOpenAIRouter = createTRPCRouter({
     .mutation(async ({ input: { access, text } }): Promise<OpenAIWire.Moderation.Response> => {
       try {
 
-        return await openaiPOST<OpenAIWire.Moderation.Response, OpenAIWire.Moderation.Request>(access, null, {
+        return await openaiPOSTOrThrow<OpenAIWire.Moderation.Response, OpenAIWire.Moderation.Request>(access, null, {
           input: text,
           model: 'text-moderation-latest',
         }, '/v1/moderations');
@@ -350,7 +381,7 @@ export const llmOpenAIRouter = createTRPCRouter({
   dialectLocalAI_galleryModelsAvailable: publicProcedure
     .input(listModelsInputSchema)
     .query(async ({ input: { access } }) => {
-      const wireLocalAIModelsAvailable = await openaiGET(access, '/models/available');
+      const wireLocalAIModelsAvailable = await openaiGETOrThrow(access, '/models/available');
       return wireLocalAIModelsAvailableOutputSchema.parse(wireLocalAIModelsAvailable);
     }),
 
@@ -363,7 +394,7 @@ export const llmOpenAIRouter = createTRPCRouter({
     }))
     .mutation(async ({ input: { access, galleryName, modelName } }) => {
       const galleryModelId = `${galleryName}@${modelName}`;
-      const wireLocalAIModelApply = await openaiPOST(access, null, { id: galleryModelId }, '/models/apply');
+      const wireLocalAIModelApply = await openaiPOSTOrThrow(access, null, { id: galleryModelId }, '/models/apply');
       return wilreLocalAIModelsApplyOutputSchema.parse(wireLocalAIModelApply);
     }),
 
@@ -374,7 +405,7 @@ export const llmOpenAIRouter = createTRPCRouter({
       jobId: z.string(),
     }))
     .query(async ({ input: { access, jobId } }) => {
-      const wireLocalAIModelsJobs = await openaiGET(access, `/models/jobs/${jobId}`);
+      const wireLocalAIModelsJobs = await openaiGETOrThrow(access, `/models/jobs/${jobId}`);
       return wireLocalAIModelsListOutputSchema.parse(wireLocalAIModelsJobs);
     }),
 
@@ -382,6 +413,7 @@ export const llmOpenAIRouter = createTRPCRouter({
 
 
 const DEFAULT_HELICONE_OPENAI_HOST = 'oai.hconeai.com';
+const DEFAULT_DEEPSEEK_HOST = 'https://api.deepseek.com';
 const DEFAULT_GROQ_HOST = 'https://api.groq.com/openai';
 const DEFAULT_LOCALAI_HOST = 'http://127.0.0.1:8080';
 const DEFAULT_MISTRAL_HOST = 'https://api.mistral.ai';
@@ -415,6 +447,22 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
           'api-key': azureKey,
         },
         url,
+      };
+
+
+    case 'deepseek':
+      // https://platform.deepseek.com/api-docs/
+      const deepseekKey = access.oaiKey || env.DEEPSEEK_API_KEY || '';
+      const deepseekHost = fixupHost(access.oaiHost || DEFAULT_DEEPSEEK_HOST, apiPath);
+      if (!deepseekKey || !deepseekHost)
+        throw new Error('Missing Deepseek API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
+
+      return {
+        headers: {
+          'Authorization': `Bearer ${deepseekKey}`,
+          'Content-Type': 'application/json',
+        },
+        url: deepseekHost + apiPath,
       };
 
 
@@ -567,24 +615,58 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
   }
 }
 
-export function openAIChatCompletionPayload(model: OpenAIModelSchema, history: OpenAIHistorySchema, functions: OpenAIFunctionsSchema | null, forceFunctionName: string | null, n: number, stream: boolean): OpenAIWire.ChatCompletion.Request {
+
+export function openAIChatCompletionPayload(dialect: OpenAIDialects, model: OpenAIModelSchema, history: OpenAIHistorySchema, functions: OpenAIFunctionsSchema | null, forceFunctionName: string | null, n: number, stream: boolean): OpenAIWire.ChatCompletion.Request {
+
+  // Hotfixes to comply with API restrictions
+  const hotfixAlternateUARoles = dialect === 'perplexity';
+  const hotfixSkipEmptyMessages = dialect === 'perplexity';
+  const performFixes = hotfixAlternateUARoles || hotfixSkipEmptyMessages;
+
+  // recreate history for hotfixes
+  // NOTE: we do not like that we have to introduce aberrations by altering history, but it's a necessary evil
+  if (performFixes) {
+    history = history.reduce((acc, historyItem) => {
+
+      // skip empty messages
+      if (hotfixSkipEmptyMessages && !historyItem.content.trim()) return acc;
+
+      // if the current item has the same role as the last item, concatenate their content
+      if (hotfixAlternateUARoles && acc.length > 0) {
+        const lastItem = acc[acc.length - 1];
+        if (lastItem.role === historyItem.role) {
+          // replace the last item with the new concatenatedItem
+          acc[acc.length - 1] = {
+            ...lastItem,
+            content: lastItem.content + ABERRATION_FIXUP_SQUASH + historyItem.content,
+          };
+          return acc;
+        }
+      }
+
+      // if it's not a case for concatenation, just push the current item to the accumulator
+      acc.push(historyItem);
+      return acc;
+    }, [] as OpenAIHistorySchema);
+  }
+
   return {
     model: model.id,
     messages: history,
     ...(functions && { functions: functions, function_call: forceFunctionName ? { name: forceFunctionName } : 'auto' }),
-    ...(model.temperature && { temperature: model.temperature }),
+    ...(model.temperature !== undefined && { temperature: model.temperature }),
     ...(model.maxTokens && { max_tokens: model.maxTokens }),
     ...(n > 1 && { n }),
     stream,
   };
 }
 
-async function openaiGET<TOut extends object>(access: OpenAIAccessSchema, apiPath: string /*, signal?: AbortSignal*/): Promise<TOut> {
+async function openaiGETOrThrow<TOut extends object>(access: OpenAIAccessSchema, apiPath: string /*, signal?: AbortSignal*/): Promise<TOut> {
   const { headers, url } = openAIAccess(access, null, apiPath);
   return await fetchJsonOrTRPCError<TOut>(url, 'GET', headers, undefined, `OpenAI/${access.dialect}`);
 }
 
-async function openaiPOST<TOut extends object, TPostBody extends object>(access: OpenAIAccessSchema, modelRefId: string | null, body: TPostBody, apiPath: string /*, signal?: AbortSignal*/): Promise<TOut> {
+async function openaiPOSTOrThrow<TOut extends object, TPostBody extends object>(access: OpenAIAccessSchema, modelRefId: string | null, body: TPostBody, apiPath: string /*, signal?: AbortSignal*/): Promise<TOut> {
   const { headers, url } = openAIAccess(access, modelRefId, apiPath);
 
   console.log({url: url, cmd: 'POST', header: headers, body: body, moduleName: `OpenAI/${access.dialect}`});

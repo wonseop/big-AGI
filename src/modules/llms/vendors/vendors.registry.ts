@@ -15,6 +15,7 @@ import { ModelVendorTogetherAI } from './togetherai/togetherai.vendor';
 
 import type { IModelVendor } from './IModelVendor';
 import { DLLMId, DModelSource, DModelSourceId, findLLMOrThrow, findSourceOrThrow } from '../store-llms';
+import { ModelVendorDeepseek } from './deepseek/deepseekai.vendor';
 
 export type ModelVendorId =
   | 'anthropic'
@@ -30,7 +31,8 @@ export type ModelVendorId =
   | 'openai'
   | 'openrouter'
   | 'perplexity'
-  | 'togetherai';
+  | 'togetherai'
+  | 'deepseek';
 
 /** Global: Vendor Instances Registry **/
 const MODEL_VENDOR_REGISTRY: Record<ModelVendorId, IModelVendor> = {
@@ -48,6 +50,7 @@ const MODEL_VENDOR_REGISTRY: Record<ModelVendorId, IModelVendor> = {
   openrouter: ModelVendorOpenRouter,
   perplexity: ModelVendorPerplexity,
   togetherai: ModelVendorTogetherAI,
+  deepseek: ModelVendorDeepseek,
 } as Record<string, IModelVendor>;
 
 const MODEL_VENDOR_DEFAULT: ModelVendorId = 'score';
@@ -76,7 +79,7 @@ export function findAccessForSourceOrThrow<TSourceSetup = unknown, TAccess = unk
   const source = findSourceOrThrow<TSourceSetup>(sourceId);
   const vendor = findVendorById<TSourceSetup, TAccess>(source.vId);
   if (!vendor) throw new Error(`ModelSource ${sourceId} has no vendor`);
-  return vendor.getTransportAccess(source.setup);
+  return { source, vendor, transportAccess: vendor.getTransportAccess(source.setup) };
 }
 
 export function createModelSourceForVendor(vendorId: ModelVendorId, otherSources: DModelSource[]): DModelSource {

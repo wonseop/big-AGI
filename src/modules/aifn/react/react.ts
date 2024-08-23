@@ -38,7 +38,7 @@ Opens the given URL and displays it
 
 ` : '') + `calculate:
 e.g. calculate: 4 * 7 / 3
-Runs a calculation and returns the number - uses Python so be sure to use floating point syntax if necessary
+Runs a simple javascript calculation and returns the number, the input must be javascript 
 
 wikipedia:
 e.g. wikipedia: Django
@@ -132,7 +132,7 @@ export class Agent {
     S.messages.push({ role: 'user', content: prompt });
     let content: string;
     try {
-      content = (await llmChatGenerateOrThrow(llmId, S.messages, null, null, 500)).content;
+      content = (await llmChatGenerateOrThrow(llmId, S.messages, 'chat-react-turn', null, null, null, 500)).content;
     } catch (error: any) {
       content = `Error in llmChatGenerateOrThrow: ${error}`;
     }
@@ -194,7 +194,8 @@ async function search(query: string): Promise<string> {
 async function browse(url: string): Promise<string> {
   try {
     const page = await callBrowseFetchPage(url);
-    return JSON.stringify(page.content ? { text: page.content } : { error: 'Issue reading the page' });
+    const pageContent = page.content.markdown || page.content.text || page.content.html || '';
+    return JSON.stringify(pageContent ? { text: pageContent } : { error: 'Issue reading the page' });
   } catch (error) {
     console.error('Error browsing:', (error as Error).message);
     return 'An error occurred while browsing to the URL. Missing WSS Key?';
